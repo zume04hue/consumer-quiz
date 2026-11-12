@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>サブスク契約シミュレーション</title>
+
+<style>
+body{
+    font-family: sans-serif;
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 20px;
+    background:#f5f5f5;
+}
+
+h1{
+    color:#0066cc;
+}
+
+.card{
+    background:white;
+    border-radius:10px;
+    padding:25px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.15);
+}
+
+button{
+    display:block;
+    width:100%;
+    margin:10px 0;
+    padding:12px;
+    border:none;
+    border-radius:5px;
+    background:#0066cc;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#004c99;
+}
+
+.result{
+    background:#eef7ff;
+}
+
+.score{
+    font-size:1.3em;
+    font-weight:bold;
+    color:#0066cc;
+}
+
+.rank{
+    font-size:1.2em;
+    margin-top:10px;
+}
+
+.comment{
+    background:#fff;
+    border-left:5px solid #0066cc;
+    padding:10px;
+    margin-top:15px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>消費者力診断 サブスク契約シミュレーション</h1>
+
+<div id="app"></div>
+
+<script>
+
+let current = 0;
+let score = 0;
+
+const scenes = [
+
+{
+text:"動画配信サービスの広告を見つけました。「1か月無料！」と書かれています。どうしますか？",
+choices:[
+{
+label:"すぐ申し込む",
+next:1,
+score:0
+},
+{
+label:"利用規約や料金を確認する",
+next:2,
+score:20
+}
+]
+},
+
+{
+text:"登録して利用を始めました。毎日楽しく視聴しています。",
+choices:[
+{
+label:"次へ",
+next:3,
+score:0
+}
+]
+},
+
+{
+text:"利用規約を確認すると「31日後から月額980円、自動更新」と書かれていました。",
+choices:[
+{
+label:"申し込む",
+next:1,
+score:10
+},
+{
+label:"他社サービスも比較する",
+next:8,
+score:20
+}
+]
+},
+
+{
+text:"無料期間終了3日前です。『まもなく無料期間が終了します』というメールが届きました。",
+choices:[
+{
+label:"あとで解約しよう",
+next:4,
+score:0
+},
+{
+label:"今すぐ解約手続きをする",
+next:5,
+score:30
+}
+]
+},
+
+{
+result:true,
+title:"結果① 解約忘れ",
+message:"解約を後回しにしたため、月額980円の料金が発生しました。"
+},
+
+{
+text:"解約ページを開きました。「本当に解約しますか？」と表示されています。",
+choices:[
+{
+label:"内容を確認せず進む",
+next:6,
+score:0
+},
+{
+label:"解約完了画面やメールを確認する",
+next:7,
+score:30
+}
+]
+},
+
+{
+result:true,
+title:"結果② 解約失敗",
+message:"最後の確定ボタンを押しておらず、契約が継続されていました。"
+},
+
+{
+result:true,
+title:"結果③ 解約成功",
+message:"解約完了メールを保存し、契約を正常に終了できました。"
+},
+
+{
+text:"他社サービスを確認すると、月額780円・自動更新なしのサービスも見つかりました。",
+choices:[
+{
+label:"比較してから契約する",
+next:9,
+score:20
+}
+]
+},
+
+{
+result:true,
+title:"結果④ 賢い消費者",
+message:"料金や契約内容を比較した上で契約を判断できました。"
+}
+
+];
+
+function getRank(){
+
+if(score >= 80){
+return "契約マスター ★★★★★";
+}
+
+if(score >= 60){
+return "しっかり確認型 ★★★★☆";
+}
+
+if(score >= 40){
+return "もう一息 ★★★☆☆";
+}
+
+return "トラブル予備軍 ★★☆☆☆";
+}
+
+function getComment(){
+
+if(score >= 80){
+return "契約内容・料金・解約方法を確認する習慣があります。非常に高い消費者力です。";
+}
+
+if(score >= 60){
+return "慎重に確認することができています。今後も契約内容をしっかり確認しましょう。";
+}
+
+if(score >= 40){
+return "契約内容を確認する意識はありますが、解約方法や自動更新にも注意しましょう。";
+}
+
+return "広告や無料という言葉だけで判断するとトラブルにつながります。契約内容をよく確認しましょう。";
+}
+
+function render(){
+
+const app = document.getElementById("app");
+const scene = scenes[current];
+
+if(scene.result){
+
+app.innerHTML = `
+<div class="card result">
+
+<h2>${scene.title}</h2>
+
+<p>${scene.message}</p>
+
+<hr>
+
+<div class="score">
+消費者力スコア：${score} 点
+</div>
+
+<div class="rank">
+判定：${getRank()}
+</div>
+
+<div class="comment">
+${getComment()}
+</div>
+
+<h3>学習ポイント</h3>
+
+<ul>
+<li>無料期間終了日を確認する</li>
+<li>自動更新の有無を確認する</li>
+<li>解約方法を事前に確認する</li>
+<li>解約完了メールを保存する</li>
+<li>複数のサービスを比較する</li>
+</ul>
+
+<button onclick="restart()">
+もう一度チャレンジ
+</button>
+
+</div>
+`;
+
+return;
+}
+
+let html = `
+<div class="card">
+<p>${scene.text}</p>
+`;
+
+scene.choices.forEach(choice => {
+
+html += `
+<button onclick="moveTo(${choice.next}, ${choice.score})">
+${choice.label}
+</button>
+`;
+
+});
+
+html += "</div>";
+
+app.innerHTML = html;
+
+}
+
+function moveTo(next, addScore){
+
+score += addScore;
+current = next;
+render();
+
+}
+
+function restart(){
+
+current = 0;
+score = 0;
+render();
+
+}
+
+render();
+
+</script>
+
+</body>
+</html>
